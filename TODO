@@ -1,4 +1,0 @@
-Make sure all your default response (500, 404) are in JSON if it's a JSON request
-
-Figure out why the JSON from destroy on authentication_tokens is coming back as Response#to_s instead of Response#body in the test
-SEE test_helper.rb in devise - the _catch_warden method -- body needs to have body.body called on it before sending it to the text key
