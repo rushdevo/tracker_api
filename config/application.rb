@@ -62,5 +62,9 @@ module TrackerApi
     config.generators do |g|
       g.test_framework :rspec
     end
+
+    config.after_initialize do |app|
+      app.routes.append{ match '*a', :to => 'application#json_404' } unless config.consider_all_requests_local
+    end
   end
 end
