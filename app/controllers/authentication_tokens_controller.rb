@@ -2,7 +2,6 @@ class AuthenticationTokensController < BaseApiController
   skip_before_filter :authenticate_user!, only: :create
 
   def create
-    resource = warden.authenticate(:scope => resource_name, :recall => "#{controller_path}#new")
     resource = User.find_for_database_authentication(login: params[:login])
 
     if resource && resource.valid_password?(params[:password])
