@@ -37,5 +37,12 @@ describe User do
       end
     end
 
+    describe "password" do
+      it "should require password confirmation" do
+        subject.password = "anewpassword"
+        subject.should_not be_valid
+        subject.errors[:password].should include("doesn't match confirmation")
+      end
+    end
   end
 end

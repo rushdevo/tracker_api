@@ -7,7 +7,7 @@ class AuthenticationTokensController < BaseApiController
     if resource && resource.valid_password?(params[:password])
       resource.reset_authentication_token
       resource.save(validate: false)
-      render :json => { success: true, auth_token: resource.authentication_token, login: resource.login }
+      render :json => successful_json_with_user_information(resource)
     else
       warden.custom_failure!
       render :json => { success: false, message: "Invalid login or password" }, status: 401
