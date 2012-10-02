@@ -1,5 +1,5 @@
 TrackerApi::Application.routes.draw do
-  devise_for :users, controllers: { registrations: 'users' }
+  devise_for :users, controllers: { registrations: 'users', passwords: 'passwords' }
 
   root to: "games#index"
 
