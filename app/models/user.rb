@@ -1,6 +1,9 @@
 class User < ActiveRecord::Base
   devise :database_authenticatable, :token_authenticatable, :registerable, :recoverable, :validatable
 
+  has_many :invitations
+  has_many :invites, class_name: "Invitation", foreign_key: :invitee_id
+
   attr_accessible :email, :login, :password, :password_confirmation
 
   validates_presence_of :login
