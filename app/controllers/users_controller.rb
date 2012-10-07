@@ -9,7 +9,7 @@ class UsersController < Devise::RegistrationsController
     if resource.save
       render json: successful_json_with_user_information(resource).merge(message: "You have successfully created an account for #{resource.login}")
     else
-      render json: { success: false, message: ar_message_for_json(resource) }
+      render json: unsuccessful_ar_json(resource)
     end
   end
 
@@ -19,7 +19,7 @@ class UsersController < Devise::RegistrationsController
     if resource.update_attributes(resource_params)
       render :json => successful_json_with_user_information(resource).merge(message: "You have successfully updated the account for #{resource.login}")
     else
-      render json: { success: false, message: ar_message_for_json(resource) }
+      render json: unsuccessful_ar_json(resource)
     end
   end
 

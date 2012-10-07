@@ -45,4 +45,75 @@ describe User do
       end
     end
   end
+
+  describe "scopes and finders" do
+    describe ".by_email_or_login(email_or_login)" do
+      let!(:other_user) { FactoryGirl.create(:user, login: "blahblah", email: "foobar@rushdevo.com") }
+
+      it "should find with a partial matching email" do
+        users = User.by_email_or_login(other_user.email[2..-2])
+        users.should have(1).user
+        users.first.should == other_user
+      end
+
+      it "should find with a fully matching email" do
+        users = User.by_email_or_login(other_user.email)
+        users.should have(1).user
+        users.first.should == other_user
+      end
+
+      it "should find with a partial matching login" do
+        users = User.by_email_or_login(other_user.login[2..-2])
+        users.should have(1).user
+        users.first.should == other_user
+      end
+
+      it "should find with a fully matching login" do
+        users = User.by_email_or_login(other_user.login)
+        users.should have(1).user
+        users.first.should == other_user
+      end
+    end
+  end
+
+  describe "#full_name" do
+    it "should be the last name if only last name is present" do
+      subject.first_name = nil
+      subject.last_name = "Last"
+      subject.full_name.should == "Last"
+    end
+
+    it "should be the first name if only the first name is present" do
+      subject.first_name = "First"
+      subject.last_name = nil
+      subject.full_name.should == "First"
+    end
+
+    it "should be the first and last name if they are both present" do
+      subject.first_name = "First"
+      subject.last_name = "Last"
+      subject.full_name.should == "First Last"
+    end
+
+    it "should be the login if first and last name are blank" do
+      subject.first_name = nil
+      subject.last_name = nil
+      subject.login = "login"
+      subject.full_name.should == "login"
+    end
+  end
+
+  describe "#simple_json" do
+    it "should return a hash of basic attributes" do
+      subject.save.should be_true
+      subject.simple_json.should == {
+        id: subject.id,
+        login: subject.login,
+        email: subject.email,
+        first_name: subject.first_name,
+        last_name: subject.last_name,
+        full_name: subject.full_name
+      }
+    end
+  end
 end

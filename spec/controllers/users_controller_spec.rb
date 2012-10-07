@@ -18,10 +18,8 @@ describe UsersController do
 
     it "should respond with valid json when successful" do
       post :create, valid_user_params
-      response.should be_successful
       user = User.find_by_login("test")
-      json = JSON.parse(response.body)
-      json['success'].should == true
+      json = json_from_response(200, true)
       json['auth_token'].should be_present
       json['auth_token'].should == user.authentication_token
       json['login'].should == "test"
@@ -36,9 +34,7 @@ describe UsersController do
 
     it "should respond with valid json when unsuccessful" do
       post :create, invalid_user_params
-      response.should be_successful
-      json = JSON.parse(response.body)
-      json['success'].should == false
+      json = json_from_response(200, false)
       json['message'].should == "Unable to save User: Password doesn't match confirmation"
     end
   end
@@ -60,10 +56,8 @@ describe UsersController do
 
     it "should respond with valid json when successful" do
       put :update, { auth_token: user.authentication_token, user: { login: "anewlogin" } }
-      response.should be_successful
-      json = JSON.parse(response.body)
+      json = json_from_response(200, true)
       user.reload
-      json['success'].should == true
       json['auth_token'].should be_present
       json['auth_token'].should == user.authentication_token
       json['login'].should == "anewlogin"
@@ -78,10 +72,8 @@ describe UsersController do
 
     it "should respond with valid json when unsuccessful" do
       put :update, { auth_token: user.authentication_token, user: { login: "anewlogin", password: "password1", password_confirmation: "password2"} }
-      response.should be_successful
-      json = JSON.parse(response.body)
+      json = json_from_response(200, false)
       user.reload
-      json['success'].should == false
       json['message'].should == "Unable to save User: Password doesn't match confirmation"
     end
   end

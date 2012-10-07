@@ -7,7 +7,7 @@ class PasswordsController < Devise::PasswordsController
     if successfully_sent?(resource)
       render json: { success: true, email: resource.email, message: "An email has been sent with password reset instructions" }
     else
-      render json: { success: false, message: ar_message_for_json(resource) }
+      render json: unsuccessful_ar_json(resource)
     end
   end
 
@@ -17,7 +17,7 @@ class PasswordsController < Devise::PasswordsController
     if resource.errors.empty?
       render json: successful_json_with_user_information(resource).merge(message: "Password reset for #{resource.login}")
     else
-      render json: { success: false, message: ar_message_for_json(resource) }
+      render json: unsuccessful_ar_json(resource)
     end
   end
 

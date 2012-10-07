@@ -1,5 +1,9 @@
 module ApiControllerHelpers
 protected
+  def unsuccessful_ar_json(object)
+    { success: false, message: ar_message_for_json(object) }
+  end
+
   def ar_message_for_json(object)
     "Unable to save #{object.class.name}: " + object.errors.full_messages.join(", ")
   end
