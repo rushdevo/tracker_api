@@ -1,8 +1,8 @@
 require 'spec_helper'
 
 describe InvitationsController do
-  let!(:user1) { FactoryGirl.create(:user) }
-  let!(:user2) { FactoryGirl.create(:user) }
+  let!(:user1) { FactoryGirl.create(:user, login: "user1login", email: "user1login@rushdevo.com") }
+  let!(:user2) { FactoryGirl.create(:user, login: "user2login", email: "user2login@rushdevo.com") }
   let!(:invitation1) { FactoryGirl.create(:invitation, user: user1, invitee: user2) }
   let!(:invitation2) { FactoryGirl.create(:invitation, user: user2, invitee: user1) }
   let!(:accepted_invitation) { FactoryGirl.create(:invitation, user: user1, accepted: true) }

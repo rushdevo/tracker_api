@@ -6,10 +6,12 @@ class Invitation < ActiveRecord::Base
   validates_format_of :email, with: User.email_regexp, allow_nil: true
   validates_presence_of :token
   validates_uniqueness_of :token
+  validates_presence_of :invitee, if: :accepted?
 
   validate :validate_email_or_invitee
 
   before_validation :generate_token, on: :create
+  before_save :make_friends!, if: lambda { |inv| inv.accepted_changed? && inv.accepted? }
 
   attr_accessible :user_id, :user, :invitee_id, :invitee, :email, :accepted
 
@@ -43,6 +45,14 @@ class Invitation < ActiveRecord::Base
     self.accepted.nil?
   end
 
+  def accept!
+    self.accepted = true
+  end
+
+  def reject!
+    self.accepted = false
+  end
+
   def status_message
     if accepted?
       "Invitation has been accepted"
@@ -73,6 +83,21 @@ protected
   def generate_token
     while self.token.blank? || !Invitation.where(token: self.token).count.zero?
       self.token = Devise.friendly_token
+    end
+  end
+
+  # Make friendship records in both directions
+  def make_friends!
+    friendships = [
+      Friendship.new(user: user, friend: invitee),
+      Friendship.new(user: invitee, friend: user)
+    ]
+    if friendships.all? { |f| f.save }
+      true
+    else
+      friend_errors = friendships.map { |f| f.valid?; f.errors.full_messages }.flatten
+      errors.add(:base, "Can't create friendship: #{friend_errors.join(', ')}")
+      false
     end
   end
 end
