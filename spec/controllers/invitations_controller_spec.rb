@@ -126,10 +126,22 @@ describe InvitationsController do
       invitation1.reload.should be_accepted
     end
 
+    it "should create friendships if accepted" do
+      lambda {
+        put :update, id: invitation1.id, auth_token: user2.authentication_token, invitation: { accepted: true }
+      }.should change(Friendship, :count).by(2)
+    end
+
     it "should reject an invitation" do
       invitation1.accepted.should be_nil
       put :update, id: invitation1.id, auth_token: user2.authentication_token, invitation: { accepted: false }
       invitation1.reload.should be_rejected
+    end
+
+    it "should not create friendships if rejected" do
+      lambda {
+        put :update, id: invitation1.id, auth_token: user2.authentication_token, invitation: { accepted: false }
+      }.should_not change(Friendship, :count)
     end
 
     it "should return successful json for an accepted invitation" do
