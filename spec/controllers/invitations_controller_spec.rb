@@ -129,7 +129,10 @@ describe InvitationsController do
     it "should create friendships if accepted" do
       lambda {
         put :update, id: invitation1.id, auth_token: user2.authentication_token, invitation: { accepted: true }
-      }.should change(Friendship, :count).by(2)
+      }.should change(Friendship, :count).by(1)
+      friendship = Friendship.last
+      friendship.user.should == user1
+      friendship.friend.should == user2
     end
 
     it "should reject an invitation" do

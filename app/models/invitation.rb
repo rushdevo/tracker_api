@@ -2,6 +2,8 @@ class Invitation < ActiveRecord::Base
   belongs_to :user
   belongs_to :invitee, class_name: "User"
 
+  has_one :friendship
+
   validates_presence_of :user
   validates_format_of :email, with: User.email_regexp, allow_nil: true
   validates_presence_of :token
@@ -9,6 +11,8 @@ class Invitation < ActiveRecord::Base
   validates_presence_of :invitee, if: :accepted?
 
   validate :validate_email_or_invitee
+
+  validates_associated :friendship
 
   before_validation :generate_token, on: :create
   before_save :make_friends!, if: lambda { |inv| inv.accepted_changed? && inv.accepted? }
@@ -88,15 +92,11 @@ protected
 
   # Make friendship records in both directions
   def make_friends!
-    friendships = [
-      Friendship.new(user: user, friend: invitee),
-      Friendship.new(user: invitee, friend: user)
-    ]
-    if friendships.all? { |f| f.save }
+    friendship = create_friendship(user: user, friend: invitee)
+    if friendship.save
       true
     else
-      friend_errors = friendships.map { |f| f.valid?; f.errors.full_messages }.flatten
-      errors.add(:base, "Can't create friendship: #{friend_errors.join(', ')}")
+      errors.add(:base, "Can't create friendship: #{friendship.errors.full_messages.join(', ')}")
       false
     end
   end

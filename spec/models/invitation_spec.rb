@@ -96,13 +96,10 @@ describe Invitation do
   describe "#make_friends!" do
     it "should generate friendship records in both directions when accepted" do
       subject.accept!
-      lambda { subject.save }.should change(Friendship, :count).by(2)
-      user_friendship = Friendship.where(user_id: user.id).first
-      user_friendship.should be_present
+      lambda { subject.save }.should change(Friendship, :count).by(1)
+      user_friendship = Friendship.last
+      user_friendship.user.should == user
       user_friendship.friend.should == invitee
-      friend_friendship = Friendship.where(user_id: invitee.id).first
-      friend_friendship.should be_present
-      friend_friendship.friend.should == user
     end
 
     it "should not generate additional friendship records the second time it is saved accepted" do
@@ -122,7 +119,7 @@ describe Invitation do
       subject.invitee = nil
       # Hard to come up with a scenario where make_friends! would be called with invalid data, so just calling it directly
       lambda { subject.send(:make_friends!).should be_false }.should_not change(Friendship, :count)
-      subject.errors[:base].should include("Can't create friendship: Friend can't be blank, User can't be blank")
+      subject.errors[:base].should include("Can't create friendship: Friend can't be blank")
     end
   end
 
