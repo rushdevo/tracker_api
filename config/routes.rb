@@ -5,4 +5,5 @@ TrackerApi::Application.routes.draw do
 
   resource :authentication_token, only: [:create, :destroy]
   resources :invitations, only: [:index, :new, :create, :update]
+  resources :friendships, only: [:index, :destroy]
 end

@@ -19,4 +19,8 @@ class Friendship < ActiveRecord::Base
       invitation: invitation.try(:simple_json)
     }
   end
+
+  def can_modify?(auser)
+    auser && (auser == user || auser == friend)
+  end
 end

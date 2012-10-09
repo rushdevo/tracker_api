@@ -43,4 +43,22 @@ describe Friendship do
       }
     end
   end
+
+  describe "#can_modify(user)" do
+    it "should be false if user is nil" do
+      subject.can_modify?(nil).should be_false
+    end
+
+    it "should be true if user is the friendship's user" do
+      subject.can_modify?(subject.user).should be_true
+    end
+
+    it "should be true if user is the friendship's friend" do
+      subject.can_modify?(subject.friend).should be_true
+    end
+
+    it "should be false if the user is not associated with the friendship" do
+      subject.can_modify?(FactoryGirl.build(:user)).should be_false
+    end
+  end
 end
