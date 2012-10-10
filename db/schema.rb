@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20121009183543) do
+ActiveRecord::Schema.define(:version => 20121010190135) do
 
   create_table "friendships", :force => true do |t|
     t.integer  "user_id"
@@ -25,6 +25,16 @@ ActiveRecord::Schema.define(:version => 20121009183543) do
   add_index "friendships", ["invitation_id"], :name => "index_friendships_on_invitation_id"
   add_index "friendships", ["user_id"], :name => "index_friendships_on_user_id"
 
+  create_table "games", :force => true do |t|
+    t.integer  "owner_id"
+    t.datetime "start_time"
+    t.string   "state"
+    t.datetime "created_at", :null => false
+    t.datetime "updated_at", :null => false
+  end
+
+  add_index "games", ["owner_id"], :name => "index_games_on_owner_id"
+
   create_table "invitations", :force => true do |t|
     t.integer  "user_id"
     t.integer  "invitee_id"
@@ -35,7 +45,9 @@ ActiveRecord::Schema.define(:version => 20121009183543) do
     t.boolean  "accepted"
   end
 
+  add_index "invitations", ["invitee_id"], :name => "index_invitations_on_invitee_id"
   add_index "invitations", ["token"], :name => "index_invitations_on_token"
+  add_index "invitations", ["user_id"], :name => "index_invitations_on_user_id"
 
   create_table "users", :force => true do |t|
     t.string   "login",                                  :null => false

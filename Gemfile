@@ -5,6 +5,8 @@ gem 'mysql2'
 gem 'devise', git: "git@github.com:diminish7/devise.git", branch: "failure_app_test_helper"
 gem 'jquery-rails'
 
+gem 'aasm'
+
 # Gems used only for assets and not required
 # in production environments by default.
 group :assets do
