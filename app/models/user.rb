@@ -1,7 +1,9 @@
 class User < ActiveRecord::Base
   devise :database_authenticatable, :token_authenticatable, :registerable, :recoverable, :validatable
 
-  has_many :games
+  has_many :owned_games, class_name: "Game", foreign_key: :owner_id
+  has_many :user_games
+  has_many :games, through: :user_games
   has_many :invitations
   has_many :invites, class_name: "Invitation", foreign_key: :invitee_id
 

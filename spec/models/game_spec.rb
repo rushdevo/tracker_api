@@ -27,6 +27,24 @@ describe Game do
     end
   end
 
+  describe "#make_owner_participate" do
+    it "should make the owner be a participant on creation" do
+      subject.should be_new_record
+      subject.owner.should be_present
+      subject.users.should be_empty
+      lambda { subject.save }.should change(UserGame, :count).by(1)
+      subject.users(true).should include(subject.owner)
+    end
+
+    it "should not be called on subsequent saves" do
+      subject.save
+      subject.should_not_receive(:make_owner_participate) do
+        subject.start_time = Time.zone.now + 5.minutes
+        subject.save
+      end
+    end
+  end
+
   describe "state machine" do
     it "should default to the pending state" do
       subject.state.should be_nil
@@ -58,6 +76,12 @@ describe Game do
           Game.complete.should == [complete_game]
         end
       end
+
+      describe ".incomplete" do
+        it "should return pending or in_progress games" do
+          Game.incomplete.should include_only(pending_game, in_progress_game)
+        end
+      end
     end
 
     describe ".owned_by(user)" do
@@ -69,6 +93,40 @@ describe Game do
       it "should return only games owned by the given user" do
         Game.owned_by(user).should == [game]
       end
+    end
+
+    describe ".for_user(user)" do
+      let!(:user) { FactoryGirl.create(:user) }
+      let!(:game) {
+        g = FactoryGirl.create(:game)
+        g.user_games.create(user: user)
+        g
+      }
+      let!(:other_game) { FactoryGirl.create(:game) }
+
+      it "should return only games that the user belongs to" do
+        Game.for_user(user).should == [game]
+      end
+    end
+  end
+
+  describe "#simple_json" do
+    let(:participant) { FactoryGirl.create(:user) }
+    let(:owner) { subject.owner }
+
+    before do
+      subject.user_games.build(user: participant, game: subject)
+      subject.save.should be_true
+    end
+
+    it "should return a hash of basic attributes" do
+      subject.simple_json.should == {
+        id: subject.id,
+        start_time: subject.start_time,
+        state: subject.state,
+        owner: subject.owner.simple_json,
+        users: [participant.simple_json, owner.simple_json]
+      }
     end
   end
 end

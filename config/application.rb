@@ -61,6 +61,7 @@ module TrackerApi
 
     config.generators do |g|
       g.test_framework :rspec
+      g.fixture_replacement :factory_girl
     end
 
     config.after_initialize do |app|

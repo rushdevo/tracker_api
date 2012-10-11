@@ -17,7 +17,7 @@ class UsersController < Devise::RegistrationsController
     resource = User.to_adapter.get!(current_user.to_key)
 
     if resource.update_attributes(resource_params)
-      render :json => successful_json_with_user_information(resource).merge(message: "You have successfully updated the account for #{resource.login}")
+      render json: successful_json_with_user_information(resource).merge(message: "You have successfully updated the account for #{resource.login}")
     else
       render json: unsuccessful_ar_json(resource)
     end

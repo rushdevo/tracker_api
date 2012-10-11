@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20121010190135) do
+ActiveRecord::Schema.define(:version => 20121011185254) do
 
   create_table "friendships", :force => true do |t|
     t.integer  "user_id"
@@ -48,6 +48,16 @@ ActiveRecord::Schema.define(:version => 20121010190135) do
   add_index "invitations", ["invitee_id"], :name => "index_invitations_on_invitee_id"
   add_index "invitations", ["token"], :name => "index_invitations_on_token"
   add_index "invitations", ["user_id"], :name => "index_invitations_on_user_id"
+
+  create_table "user_games", :force => true do |t|
+    t.integer  "user_id"
+    t.integer  "game_id"
+    t.datetime "created_at", :null => false
+    t.datetime "updated_at", :null => false
+  end
+
+  add_index "user_games", ["game_id"], :name => "index_user_games_on_game_id"
+  add_index "user_games", ["user_id"], :name => "index_user_games_on_user_id"
 
   create_table "users", :force => true do |t|
     t.string   "login",                                  :null => false
