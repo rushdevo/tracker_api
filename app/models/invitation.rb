@@ -2,7 +2,7 @@ class Invitation < ActiveRecord::Base
   belongs_to :user
   belongs_to :invitee, class_name: "User"
 
-  has_one :friendship
+  has_one :friendship, dependent: :destroy
 
   validates_presence_of :user
   validates_format_of :email, with: User.email_regexp, allow_nil: true

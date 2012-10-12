@@ -2,7 +2,7 @@ class Game < ActiveRecord::Base
   include AASM
 
   belongs_to :owner, class_name: "User"
-  has_many :user_games
+  has_many :user_games, dependent: :destroy
   has_many :users, through: :user_games
 
   validates_presence_of :owner, :start_time
@@ -38,6 +38,23 @@ class Game < ActiveRecord::Base
     event :finish do
       transitions :to => :complete, :from => [:pending, :in_progress]
     end
+  end
+
+  def joining_user_id=(user_id)
+    user = User.find_by_id(user_id)
+    user_games.create(game: self, user: user) if user && !users.include?(user)
+  end
+
+  def leaving_user_id=(user_id)
+    user = User.find_by_id(user_id)
+    user_games.where(user_id: user.id).first.try(:destroy) if user
+  end
+
+  # Returns true if params can be modified by the given user
+  # True if the given user is the owner, or if the params only
+  # has keys for joining or leaving the game
+  def validate_params_for(user, params)
+    user == owner || (params.keys.map(&:to_sym) - [:joining_user_id, :leaving_user_id]).empty?
   end
 
   def simple_json

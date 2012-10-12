@@ -19,6 +19,15 @@ class GamesController < ApplicationController
   end
 
   def update
-    # TODO: This should be used to join the game? Look for param :user_id to set up a new user
+    game = Game.find(params[:id])
+    if game.validate_params_for(current_user, params[:game])
+      if game.update_attributes(params[:game])
+        render json: { success: true, game: game.simple_json }
+      else
+        render json: unsuccessful_ar_json(game)
+      end
+    else
+      render json: { success: false, message: "You do not have permissions to modify this game" }, status: 401
+    end
   end
 end

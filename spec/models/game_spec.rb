@@ -45,6 +45,81 @@ describe Game do
     end
   end
 
+  describe "#joining_user_id=(user_id)" do
+    let(:joiner) { FactoryGirl.create(:user) }
+    before { subject.save! }
+
+    it "should create a UserGame for the given user" do
+      lambda { subject.joining_user_id = joiner.id }.should change(UserGame, :count).by(1)
+      user_game = UserGame.last
+      user_game.user.should == joiner
+      user_game.game.should == subject
+    end
+
+    it "should do nothing if the user is already a member of the game" do
+      subject.user_games.create(user: joiner, game: subject)
+      lambda { subject.joining_user_id = joiner.id }.should_not change(UserGame, :count)
+    end
+
+    it "should do nothing if user_id is nil" do
+      lambda { subject.joining_user_id = nil }.should_not change(UserGame, :count)
+    end
+
+    it "should do nothing if user_id is an invalid user id" do
+      lambda { subject.joining_user_id = 10000000 }.should_not change(UserGame, :count)
+    end
+  end
+
+  describe "#leaving_user_id=(user_id)" do
+    let(:leaver) { FactoryGirl.create(:user) }
+    before do
+      subject.save!
+      subject.user_games.create(user: leaver, game: subject)
+    end
+
+    it "should remove the UserGame for the given user" do
+      lambda { subject.leaving_user_id = leaver.id }.should change(UserGame, :count).by(-1)
+      subject.users(true).should_not include(leaver)
+    end
+
+    it "should do nothing if the user is not already a member of the game" do
+      other_leaver = FactoryGirl.create(:user)
+      lambda { subject.leaving_user_id = other_leaver.id }.should_not change(UserGame, :count)
+    end
+
+    it "should do nothing if user_id is nil" do
+      lambda { subject.leaving_user_id = nil }.should_not change(UserGame, :count)
+    end
+
+    it "should do nothing if user_id is an invalid user_id" do
+      lambda { subject.leaving_user_id = 100000 }.should_not change(UserGame, :count)
+    end
+  end
+
+  describe "#validate_params_for(user, params)" do
+    let(:joiner) { FactoryGirl.create(:user) }
+    let(:leaver) { FactoryGirl.create(:user) }
+    let(:owner_params) { { 'start_time' => Time.zone.now+1.hour }.with_indifferent_access }
+    let(:joining_params) { { 'joining_user_id' => joiner.id } }
+    let(:leaving_params) { { 'leaving_user_id' => leaver.id } }
+
+    it "should be true if the user is the owner" do
+      subject.validate_params_for(subject.owner, owner_params).should be_true
+    end
+
+    it "should be true for any user if the params contains only params for joining the game" do
+      subject.validate_params_for(joiner, joining_params).should be_true
+    end
+
+    it "should be true for any user if the params contains only params for leaving the game" do
+      subject.validate_params_for(leaver, leaving_params).should be_true
+    end
+
+    it "should be false for a non-owner trying to modify the game" do
+      subject.validate_params_for(joiner, owner_params).should be_false
+    end
+  end
+
   describe "state machine" do
     it "should default to the pending state" do
       subject.state.should be_nil
