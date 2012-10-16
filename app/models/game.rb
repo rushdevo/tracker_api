@@ -23,7 +23,7 @@ class Game < ActiveRecord::Base
     joins(:user_games).where('user_games.user_id' => user.id)
   }
 
-  attr_accessible :start_time
+  attr_accessible :start_time, :joining_user_id, :leaving_user_id
 
   # State Machine
   aasm column: :state do
@@ -42,7 +42,10 @@ class Game < ActiveRecord::Base
 
   def joining_user_id=(user_id)
     user = User.find_by_id(user_id)
-    user_games.create(game: self, user: user) if user && !users.include?(user)
+    if user && !users.include?(user)
+      builder = new_record? ? :build : :create
+      user_games.send(builder, game: self, user: user)
+    end
   end
 
   def leaving_user_id=(user_id)
@@ -54,7 +57,15 @@ class Game < ActiveRecord::Base
   # True if the given user is the owner, or if the params only
   # has keys for joining or leaving the game
   def validate_params_for(user, params)
-    user == owner || (params.keys.map(&:to_sym) - [:joining_user_id, :leaving_user_id]).empty?
+    if user != owner
+      # If the user is not the owner, a) can't submit anything but joining or leaving,
+      # and b) can only submit themselves for joining or leaving
+      if (params.keys.map(&:to_sym) - [:joining_user_id, :leaving_user_id]).present? ||
+        [params[:joining_user_id], params[:leaving_user_id]].compact.any? { |id| id.to_i != user.id }
+        return false
+      end
+    end
+    true
   end
 
   def simple_json

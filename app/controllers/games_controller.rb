@@ -1,4 +1,4 @@
-class GamesController < ApplicationController
+class GamesController < BaseApiController
   def index
     render json: {
       success: true,

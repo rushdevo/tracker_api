@@ -12,5 +12,21 @@ def json_from_response(expected_status, expected_success)
 end
 
 def compare_json_to_simple_json(json, object)
-  json.with_indifferent_access.should == object.simple_json.with_indifferent_access
+  normalize_hash(json).should == normalize_hash(object.simple_json)
+end
+
+def normalize_hash(hash)
+  convert_to_json_values(hash).with_indifferent_access
+end
+
+def convert_to_json_values(hash)
+  hash.keys.each do |key|
+    if hash[key].kind_of?(Hash)
+      # Recurse if the value at that key is also a hash
+      hash[key] = convert_to_json_values(hash[key])
+    else
+      hash[key] = hash[key].as_json
+    end
+  end
+  hash
 end

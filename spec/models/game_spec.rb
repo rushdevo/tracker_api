@@ -100,8 +100,8 @@ describe Game do
     let(:joiner) { FactoryGirl.create(:user) }
     let(:leaver) { FactoryGirl.create(:user) }
     let(:owner_params) { { 'start_time' => Time.zone.now+1.hour }.with_indifferent_access }
-    let(:joining_params) { { 'joining_user_id' => joiner.id } }
-    let(:leaving_params) { { 'leaving_user_id' => leaver.id } }
+    let(:joining_params) { { 'joining_user_id' => joiner.id }.with_indifferent_access }
+    let(:leaving_params) { { 'leaving_user_id' => leaver.id }.with_indifferent_access }
 
     it "should be true if the user is the owner" do
       subject.validate_params_for(subject.owner, owner_params).should be_true
@@ -117,6 +117,14 @@ describe Game do
 
     it "should be false for a non-owner trying to modify the game" do
       subject.validate_params_for(joiner, owner_params).should be_false
+    end
+
+    it "should be false for a non owner trying to join someone else" do
+      subject.validate_params_for(leaver, joining_params).should be_false
+    end
+
+    it "should be false for a non owner trying to leave for someone else" do
+      subject.validate_params_for(joiner, leaving_params).should be_false
     end
   end
 
