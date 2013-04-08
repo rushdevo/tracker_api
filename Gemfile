@@ -1,6 +1,6 @@
 source 'https://rubygems.org'
 
-gem 'rails', '3.2.8'
+gem 'rails', '3.2.13'
 gem 'mysql2'
 gem 'devise', git: "git@github.com:diminish7/devise.git", branch: "failure_app_test_helper"
 gem 'jquery-rails'
